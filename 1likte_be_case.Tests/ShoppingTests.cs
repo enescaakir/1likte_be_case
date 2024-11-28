@@ -25,6 +25,25 @@ namespace _1likte_be_case.Tests
         }
 
         [Fact]
+        public void GetCart_ShouldGetProducts()
+        {
+            var cart = _cartService.CreateCart();
+            var productList = new List<Product>() {
+                new Product("Book", 20.00m, "store1"),
+                new Product("Television", 1000.00m, "store2"),
+                new Product("Notebook", 1500.00m, "store2"),
+            };
+            _cartService.AddToCart(cart.Id, productList[0], 3);
+            _cartService.AddToCart(cart.Id, productList[1], 1);
+            _cartService.AddToCart(cart.Id, productList[2], 1);
+
+            var products = _cartService.GetCart(cart.Id).Items.ToList();
+
+            Assert.Equal(productList.Count, products.Count);
+            Assert.Equal(2560.00m, _cartService.GetTotalPrice(cart.Id));
+        }
+
+        [Fact]
         public void RemoveFromCart_ShouldRemoveProduct()
         {
             var cart = _cartService.CreateCart();
@@ -38,7 +57,7 @@ namespace _1likte_be_case.Tests
         }
 
         [Fact]
-        public void ClearCart_ShouldRemoveProduct()
+        public void ClearCart_ShouldClearProduct()
         {
             var cart = _cartService.CreateCart();
             var product = new Product("Book", 20.00m, "store1");
