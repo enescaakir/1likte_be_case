@@ -38,6 +38,19 @@ namespace _1likte_be_case.Tests
         }
 
         [Fact]
+        public void ClearCart_ShouldRemoveProduct()
+        {
+            var cart = _cartService.CreateCart();
+            var product = new Product("Book", 20.00m, "store1");
+            _cartService.AddToCart(cart.Id, product, 3);
+
+            _cartService.RemoveFromCart(cart.Id, product, 3);
+
+            Assert.Empty(cart.Items);
+            Assert.Equal(0, _cartService.GetTotalPrice(cart.Id));
+        }
+
+        [Fact]
         public void GetCartTotal_ShouldReturnCorrectTotal()
         {
             var cart = _cartService.CreateCart();

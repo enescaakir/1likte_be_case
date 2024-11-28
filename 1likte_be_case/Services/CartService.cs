@@ -14,20 +14,12 @@ namespace _1likte_be_case.Services
         }
         public void AddToCart(Guid cartId, Product product, int quantity)
         {
-            if (product == null) throw new ArgumentNullException(nameof(product));
             var cart = _carts.FirstOrDefault(x => x.Id == cartId);
-            var cartIndex = _carts.IndexOf(cart);
+            if (cart is null) throw new ArgumentNullException(nameof(cart));
+            _carts.Remove(cart);
 
-            var existItem = cart.Items.FirstOrDefault(x => x.Product == product);
-            if (existItem != null)
-                IncreaseQuantity(cart, product, quantity);
-            else
-            {
-                var cartItem = new CartItem(product, quantity);
-                cart.Items.Add(cartItem);
-            }
-            CalculateCartTotal(cart);
-            _carts[cartIndex] = cart;
+            cart.AddToCart(product, quantity);
+            _carts.Add(cart);
         }
 
         public Cart GetCart(Guid cartId)
@@ -38,38 +30,22 @@ namespace _1likte_be_case.Services
         public void RemoveFromCart(Guid cartId, Product product, int quantity)
         {
             var cart = _carts.FirstOrDefault(x => x.Id == cartId);
-            var cartIndex = _carts.IndexOf(cart);
+            if (cart is null) throw new ArgumentNullException(nameof(cart));
+            _carts.Remove(cart);
 
-            var existItem = cart.Items.FirstOrDefault(x => x.Product == product);
-            var existItemIndex = cart.Items.IndexOf(existItem);
-            if (existItem == null)
-                throw new ArgumentNullException(nameof(product));
-
-            DecreaseQuantity(cart, product, quantity);
-            CalculateCartTotal(cart);
-
-            _carts[cartIndex] = cart;
+            cart.RemoveFromCart(product, quantity);
+            if (cart.Items.Any())
+                _carts.Add(cart);
         }
 
         public decimal GetTotalPrice(Guid cartId)
         {
             var cart = _carts.FirstOrDefault(x => x.Id == cartId);
+            if (cart is null)
+                return 0;
             return cart.TotalPrice;
         }
 
-        private void IncreaseQuantity(Cart cart, Product product, int quantity)
-        {
-            cart.Items.FirstOrDefault(x => x.Product == product).Quantity += quantity;
-        }
 
-        private void DecreaseQuantity(Cart cart, Product product, int quantity)
-        {
-            cart.Items.FirstOrDefault(x => x.Product == product).Quantity -= quantity;
-        }
-
-        private void CalculateCartTotal(Cart cart)
-        {
-            cart.TotalPrice = cart.Items.Sum(x => x.Product.Price * x.Quantity);
-        }
     }
 }
